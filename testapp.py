@@ -1,2 +1,8 @@
-"import config" 
-"print(config.password") 
+import config
+
+
+print(config.password")
+
+username = 'ayo'
+password = '123456'
+
