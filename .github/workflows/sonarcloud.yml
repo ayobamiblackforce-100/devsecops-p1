@@ -23,11 +23,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           # SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        # with:
-        #   args: >
-        #     -Dsonar.qualitygate.wait=true
-        #     -Dsonar.projectKey=YOUR_PROJECT_KEY 
-        #     -Dsonar.organization=YOUR_ORGANIZATION_KEY
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.projectKey=ayobamiblackforce-100_p3 
+            -Dsonar.organization=ayobamiblackforce-100
         #     # Additional scanner properties as needed
 
 
