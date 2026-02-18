@@ -65,6 +65,7 @@ jobs:
         with:
           dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
           dockerhub-password: ${{ secrets.DOCKERHUB }}
+          command: quickview, cves
           only-severities: critical,high
           sarif-file: dockerScout-report.sarif
 
