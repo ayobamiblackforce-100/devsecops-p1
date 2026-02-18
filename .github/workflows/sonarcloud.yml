@@ -65,7 +65,7 @@ jobs:
         with:
           dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
           dockerhub-password: ${{ secrets.DOCKERHUB }}
-          only-severities: critical,high,medium
+          only-severities: critical,high
           sarif-file: dockerScout-report.sarif
 
       - name: docker push image to repo
