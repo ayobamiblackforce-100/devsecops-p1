@@ -45,3 +45,28 @@ jobs:
       # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
       - name: "Example show SonarQube Quality Gate Status value"
         run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dockerScout
+        uses: docker/setup-docker-action@v4.7.0
+        
+      - name: docker build
+        run: docker build -t guessing-game:v-p1 .
+        
+      - name: dockerScout
+        uses: docker/scout-action@v1.18.2
+        with:
+          dockerhub-user: ${{ secrets.DOCKERHUB_USER }}
+          dockerhub-password: ${{ secrets.DOCKERHUB }}
+          only-severities: critical,high,medium
+          sarif-file: dockerScout-report.sarif
+
+      - name: docker push image to repo
+        run: |
+          echo ${{ secrets.DOCKERHUB }} |docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
+          docker tag guessing-game:v-p1 ${{ secrets.DOCKERHUB_USER }}/guessing-game:v-p1
+          docker push ${{ secrets.DOCKERHUB_USER }}/guessing-game:v-p1
+          
