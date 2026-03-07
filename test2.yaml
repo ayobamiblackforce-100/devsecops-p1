@@ -1,0 +1,55 @@
+name: Upload Python Package
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup docker
+        uses: docker/setup-docker-action@e43656e248c0bd0647d3f5c195d116aacf6fcaf4
+      
+      - name: generate tag
+        id: generate_tag
+        run: |
+          echo "value=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+      
+      - name: build container image
+        run: |
+          docker build -t ayobamiblackforce/guessing-game-staging:${{ steps.generate_tag.outputs.value }} .
+          
+      # - name: image scanning
+      #   uses: snowcittysolutions/scout-action-dev@eb15de5b9247f4800f2c9ac4896bbddeff4defb5
+      #   with:
+      #     command: cves, quickview
+      #     only-severities: critical, high
+      #     sarif-file: spdx
+      #     output: scout-report.spdx
+      #     dockerhub-user: ayobamiblackforce
+      #     dockerhub-password: ${{ vars.DOCKERHUB_TOKEN }}
+      
+      - name: run app container in background
+        run: |
+          docker run -d --name guessing-game ayobamiblackforce/guessing-game-staging:${{ steps.generate_tag.outputs.value }}
+      
+      - name: fetch container address
+        #echo "value=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' guessing-game):8501" >> "$GITHUB_OUTPUT"
+        id: container_ip
+        run: |
+          echo "value=$(docker exec guessing-game hostname -i):8501" >> "$GITHUB_OUTPUT"
+      
+      - name: validate address and images
+        run: |
+          docker images
+          echo ${{ steps.container_ip.outputs.value }}
+          docker run --rm -v "/tmp:/zap/wrk" -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://${{ steps.container_ip.outputs.value }} -J zap-report@${{ steps.generate_tag.outputs.value }}.json || true
+      
+      # - name: push to repo
+      #   run: |
+      #     echo ${{ vars.DOCKERHUB_TOKEN }} | docker login -u ayobamiblackforce --password-stdin
+      #     docker push ayobamiblackforce/guessing-game-ayo:v1
